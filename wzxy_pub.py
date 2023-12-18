@@ -71,7 +71,11 @@ def getTodayHeatList(jwsession):
     # print("打卡列表:")
 
     for item in res.get("data").get("list"):
-        dayHeatList.append(item.get("id"))
+        id = item.get("id")
+        startTime = item.get("start")
+        endTime = item.get("end")
+        dayHeathListData = {"id": id, "sTime": startTime, "eTime": endTime}
+        dayHeatList.append(dayHeathListData)
         '''
         for key, value in item.items():
             print(key + ":", value)
@@ -153,8 +157,20 @@ def main():
     jwsession = login("", "")
     # print(jwsession)
     getTodayHeatList(jwsession)
-    for ids in dayHeatList:
-        doTodayHeatList(jwsession, ids)
+    now = datetime.now()
+    for item in dayHeatList:
+        if datetime.strptime(item.get("sTime"), "%H:%M").time() <= now.time() <= datetime.strptime(item.get("eTime"),
+                                                                                                  "%H:%M").time():
+            print(
+                f"当前时间:{now.time()}\n[{item.get('id')}]:{item.get('sTime')}-{item.get('eTime')}\n在打卡范围内。")
+            sendNotice(
+                f"当前时间:{now.time()}\n[{item.get('id')}]:{item.get('sTime')}-{item.get('eTime')}\n在打卡范围内。")
+            doTodayHeatList(jwsession, item.get(id))
+        else:
+            print(
+                f"当前时间:{now.time()}\n[{item.get('id')}]:{item.get('sTime')}-{item.get('eTime')}\n不在打卡范围内。")
+            sendNotice(
+                f"当前时间:{now.time()}\n[{item.get('id')}]:{item.get('sTime')}-{item.get('eTime')}\n不在打卡范围内。")
 
 
 if __name__ == '__main__':
